@@ -1,4 +1,7 @@
-episodes-*
+*.mp3
+*.wav
+*.tar.gz
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
