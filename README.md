@@ -5,10 +5,11 @@ searchable through a web application.
 
 ## Architecture
 
-1. Podcast files retriever
-2. Transcriber
-3. Insert into database (SQLite?)
-4. Expose transcriptions as a web app search engine
+1. Retrieve podcast episodes
+2. Cut initial and ending credits
+3. Transcriber
+4. Insert into database (SQLite?)
+5. Expose transcriptions as a web app search engine
 
 
 ## APIs
