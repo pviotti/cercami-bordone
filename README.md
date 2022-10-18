@@ -5,14 +5,29 @@ searchable through a web application.
 
 ## Architecture
 
-1. Retrieve podcast episodes
-2. Cut initial and ending credits
-3. Transcriber
-4. Insert into database (SQLite?)
-5. Expose transcriptions as a web app search engine
+-[x] Retrieve podcast episodes
+-[x] Cut initial and ending credits
+-[ ] Transcriber
+-[ ] Insert into database (SQLite?)
+-[ ] Expose transcriptions as a web app search engine
 
 
 ## APIs
+
+## OpenAI Whisper
+
+[GH repo](https://github.com/openai/whisper), [announcement](https://openai.com/blog/whisper/).
+
+```bash
+time whisper --model medium --task transcribe --fp16 False --output_dir transcriptions episodes-cut/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3
+#whisper --model medium --task transcribe --fp16 False --output_dir    38587.67s user 428.06s system 392% cpu 2:45:44.79 total
+
+time whisper --model small --language it --model_dir /dev/shm/whisper --task transcribe --fp16 False --output_dir output-small episodes-cut/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3
+#whisper --model small --language it --model_dir /dev/shm/whisper --task        11400.85s user 47.84s system 397% cpu 48:02.13 total
+
+# check difference between small and medium
+diff {output-small,transcriptions}/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3.txt
+```
 
 ### Azure Cognitive Services
 
