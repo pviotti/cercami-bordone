@@ -24,10 +24,10 @@ class PodcastSpider(scrapy.Spider):
     def after_login(self, response: TextResponse):
         login_error = response.css("div#login_error").extract_first()
         if login_error:
-            print(f"Found login error: {login_error}")
+            print(f">>> Login error: {login_error}")
             return
 
-        print("login succedeed!")
+        print(">>> Login succedeed!")
         return scrapy.Request(
                 url="https://www.ilpost.it/podcasts/tienimi-bordone/",
                 callback=self.parse_page)
@@ -37,15 +37,15 @@ class PodcastSpider(scrapy.Spider):
         play_elements = [el for el in response.css("a.play") if "data-file" in el.attrib]
         for element in play_elements:
             item = TbfetcherItem()
-            item["file_urls"] = [element.attrib["data-file"]]
+            item["file_urls"] = [element.attrib["data-url"]]
             item["desc"] = element.attrib["data-desc"]
             item["title"] = element.attrib["data-title"]
             yield item
 
-        next_page = response.css("a.next::attr(href)").extract_first()
-        print(next_page)
+        next_page = response.css('a.next::attr(href)').extract_first()
+        print(f">>> Next page: {next_page}")
         if next_page:
             yield scrapy.Request(
-                url=next_page,
+                url=f"https://www.ilpost.it{next_page}",
                 callback=self.parse_page
             )
