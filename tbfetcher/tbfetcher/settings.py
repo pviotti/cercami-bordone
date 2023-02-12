@@ -19,6 +19,10 @@ NEWSPIDER_MODULE = 'tbfetcher.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
+# Follow redirect (HTTP 302) when downloading files
+# https://doc.scrapy.org/en/latest/topics/media-pipeline.html#allowing-redirections
+MEDIA_ALLOW_REDIRECTS = True
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -67,7 +71,7 @@ ITEM_PIPELINES = {
     'tbfetcher.pipelines.TbfetcherPipeline': 1,
 }
 
-FILES_STORE = './downloads'
+FILES_STORE = '../../episodes-original'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
