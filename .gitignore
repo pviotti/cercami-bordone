@@ -1,7 +1,9 @@
 *.mp3
 *.wav
 *.tar.gz
+*.transcription
 .vscode
+__archive
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
