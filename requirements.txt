@@ -1,1 +1,4 @@
 scrapy
+azure-speech-client
+azure-storage-blob
+python-dotenv
