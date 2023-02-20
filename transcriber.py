@@ -149,7 +149,7 @@ def transcribe():
                     results_url = file_data.links.content_url
                     logging.info(f"Getting content URL {results_url} for {audiofilename}...")
                     results = requests.get(results_url)
-                    output_file = f"./azure-batch-transcriptions/{audiofilename.split('/')[1].strip('.mp3.json')}.txt"
+                    output_file = f"./transcriptions/{audiofilename.split('/')[1].strip('.mp3.json')}.transcription"
                     logging.info(f"Results for {audiofilename} written to {output_file}.")
                     # logging.info(f"Results for {audiofilename}:\n{results.content.decode('utf-8')}")
                     try:
