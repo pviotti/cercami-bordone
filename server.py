@@ -83,12 +83,66 @@ class Database:
     def dump(self):
         print(self.db)
 
+    def _build_excerpt_around_index(self, content: str, index: int, length: int) -> str:
+        # left side
+        l_index = index
+        for _ in range(length // 2):
+            l_index = content.rfind(" ", 0, l_index)
+            if l_index == -1:
+                break
+
+        # right side
+        r_index = index
+        for _ in range(length // 2):
+            r_index = content.find(" ", r_index + 1)
+            if r_index == -1:
+                break
+
+        l_index = 0 if l_index == -1 else l_index
+        r_index = len(content) if r_index == -1 else r_index
+        return content[l_index : r_index]
+
+
+    def _get_excerpts(self, content: str, term: str, length: int=20) -> list[str]:
+        start = 0
+        f_index = 0
+        excerpts = []
+        while f_index != -1:
+            f_index = content.find(term, start)
+            if f_index != -1:
+                excerpts.append(self._build_excerpt_around_index(content, f_index, length))
+                start = f_index + 1
+
+        return excerpts
+
+
     def grep(self, term: str) -> list[Transcription]:
         """Grep the database of transcriptions for a list of episodes
-        that contain the given term."""
-        for key, val in self.db.items():
-            if term in val.content.lower():
-                print(self.db[key])
+        that contain the given term.
+
+        return:
+        [
+            {
+                date:
+                title:
+                url:
+                excerpts:  ["", "", ...]
+            }
+        ]
+
+        """
+
+        ret = []
+        for transcr in self.db.values():
+            if term in transcr.content.lower():
+                print(transcr)
+                excerpts = self._get_excerpts(transcr.content.lower(), term)
+                for ex in excerpts:
+                    print(f"     '{ex}'")
+                print()
+
+
+        # TODO
 
 
 def _get_date_title(filepath: str) -> tuple[str, str]:
@@ -117,5 +171,6 @@ def fix_transcriptions_titles(path: str = "transcriptions", ext: str = "transcri
 if __name__ == "__main__":
     # fix_transcriptions_titles()
     d = Database()
-    d.dump()
-    d.grep("telefono")
+    # d.dump()
+    # d.grep("telefono")
+    d.grep("monicelli")
