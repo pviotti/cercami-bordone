@@ -28,6 +28,9 @@ class Transcription:
     title: str
     url: str
 
+    def __repr__(self) -> str:
+        return datetime.strftime(self.date, "%Y-%m-%d") + " - " + self.title
+
 
 def slugify(value, allow_unicode: bool = False):
     """
@@ -52,7 +55,7 @@ def slugify(value, allow_unicode: bool = False):
 
 class Database:
     def __init__(self):
-        self.db: dict[str, Transcription] = {}
+        self.db: dict[datetime, Transcription] = {}
         self._load_files()
 
     def _load_files(self, path: str = "transcriptions", ext: str = "transcription"):
@@ -75,7 +78,7 @@ class Database:
                 url=url
             )
 
-            self.db[transcr.title] = transcr
+            self.db[transcr.date] = transcr
 
     def dump(self):
         print(self.db)
@@ -83,7 +86,9 @@ class Database:
     def grep(self, term: str) -> list[Transcription]:
         """Grep the database of transcriptions for a list of episodes
         that contain the given term."""
-        pass
+        for key, val in self.db.items():
+            if term in val.content.lower():
+                print(self.db[key])
 
 
 def _get_date_title(filepath: str) -> tuple[str, str]:
@@ -113,3 +118,4 @@ if __name__ == "__main__":
     # fix_transcriptions_titles()
     d = Database()
     d.dump()
+    d.grep("telefono")
