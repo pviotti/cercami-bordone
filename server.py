@@ -29,8 +29,20 @@ class Transcription:
     url: str
 
     def __repr__(self) -> str:
-        return datetime.strftime(self.date, "%Y-%m-%d") + " - " + self.title
+        return f"{datetime.strftime(self.date, '%Y-%m-%d')} - {self.title}"
 
+@dataclass
+class GrepResult:
+    date: datetime
+    title: str
+    url: str
+    excerpts: list[str]
+
+    def __repr__(self) -> str:
+        res = f"{datetime.strftime(self.date, '%Y-%m-%d')} - {self.title}\n"
+        for excerpt in self.excerpts:
+            res += f"\t{excerpt}\n"
+        return res
 
 def slugify(value, allow_unicode: bool = False):
     """
@@ -116,33 +128,17 @@ class Database:
         return excerpts
 
 
-    def grep(self, term: str) -> list[Transcription]:
+    def grep(self, term: str) -> list[GrepResult]:
         """Grep the database of transcriptions for a list of episodes
         that contain the given term.
-
-        return:
-        [
-            {
-                date:
-                title:
-                url:
-                excerpts:  ["", "", ...]
-            }
-        ]
-
         """
-
         ret = []
         for transcr in self.db.values():
             if term in transcr.content.lower():
-                print(transcr)
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
-                for ex in excerpts:
-                    print(f"     '{ex}'")
-                print()
-
-
-        # TODO
+                gr = GrepResult(transcr.date, transcr.title, transcr.url, excerpts)
+                ret.append(gr)
+        return ret
 
 
 def _get_date_title(filepath: str) -> tuple[str, str]:
@@ -173,4 +169,6 @@ if __name__ == "__main__":
     d = Database()
     # d.dump()
     # d.grep("telefono")
-    d.grep("monicelli")
+    res = d.grep("cucina")
+    for r in res:
+        print(r)
