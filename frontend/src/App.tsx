@@ -1,24 +1,36 @@
 import React from 'react';
-import logo from './images/tb_logo-original.jpg';
+import logo from './images/cb_logo.jpg';
 import './App.css';
 
 function App() {
-  return (
-      <div className="">
-          <div className=''>
-              <img src={logo} className="" alt="logo" />
-          </div>
-          <div className=''>
-              <form className="">
-                  <svg width="20" height="20" fill="currentColor" className="" aria-hidden="true">
-                      <path fill-rule="evenodd" clip-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" />
-                  </svg>
-                  <input className="f" type="text" aria-label="Cerca" placeholder="Cerca..."></input>
-              </form>
-              <button className="">Cerca</button>
-          </div>
-      </div>
-  );
+    return (
+        <section className="section is-medium">
+            <div className="columns is-centered">
+                <div className="column is-two-thirds">
+
+                    <div className='section is-small columns is-centered image'>
+                        <figure className="image">
+                            <img src={logo} className="" alt="logo" />
+                        </figure>
+                    </div>
+
+                    <div className="columns is-centered">
+                        <div className="field has-addons">
+                            <div className="control">
+                                <input className="input" type="text" placeholder="" />
+                            </div>
+                            <div className="control">
+                                <a className="button is-info">
+                                    Cerca
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    );
 }
 
 export default App;
