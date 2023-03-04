@@ -4,9 +4,13 @@ from scrapy.http import TextResponse
 
 from ..items import TbfetcherItem
 
+from dotenv import load_dotenv
 
-class PodcastSpider(scrapy.Spider):
-    name = 'podcast'
+
+load_dotenv(dotenv_path="../.env", verbose=True)
+
+class TbPodcastSpider(scrapy.Spider):
+    name = 'tbfetcher'
     start_urls = ['https://www.ilpost.it/wp-login.php']
 
 
