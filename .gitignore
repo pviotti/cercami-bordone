@@ -4,6 +4,8 @@
 *.transcription
 .vscode
 __archive
+api/static/
+api/transcriptions
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
