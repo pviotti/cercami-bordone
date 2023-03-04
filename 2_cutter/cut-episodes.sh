@@ -1,15 +1,18 @@
 #!/bin/bash
 # Script to cut initial and ending part of a set of mp3 files.
 
+INPUT_PATH="../output/episodes-original"
+OUTPUT_PATH="../output/episodes-cut"
+
 start_timestamp=17
 end_margin=7
 
 OIFS="$IFS"
 IFS=$'\n'
-for f in $(ls ./episodes-original)
+for f in $(ls $INPUT_PATH)
 do
-    src_path="./episodes-original/$f"
-    dst_path="./episodes-cut/$f"
+    src_path="$INPUT_PATH/$f"
+    dst_path="$OUTPUT_PATH/$f"
     if [ ! -f $dst_path ]; then
         echo "Processing: $src_path --> $dst_path"
         end_timestamp=$(($(mp3info -p "%S\n" "$src_path") -$end_margin))
