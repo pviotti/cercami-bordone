@@ -1,4 +1,6 @@
-scrapy
-azure-speech-client
-azure-storage-blob
 python-dotenv
+scrapy
+./3_transcriber/azure-speech-client
+azure-storage-blob
+requests
+flask
