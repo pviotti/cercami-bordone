@@ -1,214 +1,71 @@
 # Cercami Bordone
 
-Speech to text experiment consisting in transcribing [podcast episodes][tb] and making them
+Speech-to-text experiment consisting in transcribing [podcast episodes][tb] and making them
 searchable through a web application.
 
-## Architecture
+Steps involved:
+1. Retrieve podcast episodes
+2. Cut initial and ending credits
+3. Upload cut episodes to Azure storage and transcribe
+    them with Azure Speech Services
+4. Expose transcriptions as a search engine web application
 
--[x] Retrieve podcast episodes
--[x] Cut initial and ending credits
--[ ] Transcriber
--[ ] Insert into database (SQLite?)
--[ ] Expose transcriptions as a web app search engine
+## Setup
 
+1. Install required Python packages
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    python -m pip -r requirements.txt
+    ```
+2. Setup secrets in `.env` file
+    ```
+    AZURE_SUB_KEY: Azure Speech Services subscription key
+    AZURE_REGION: Azure Speech Services region
+    AZURE_STORAGE_CONNECTION_STRING: Azure Storage Account connection key (Storage account > Access keys)
+    AZURE_BLOB_CONTAINER_URI: Azure Container URL (Container > Shared access token - Read and List rights)
+    ILPOST_USER: Il Post username
+    ILPOST_PASS: Il Post password
+    ```
+3. Setup output folders
+    ```bash
+    mkdir -p output/episodes-original output/episodes/cut output/transcriptions
+    ln -s $(pwd)/output/transcriptions api/transcriptions
+    ```
 
-## APIs
+## Run
 
-## OpenAI Whisper
-
-[GH repo](https://github.com/openai/whisper), [announcement](https://openai.com/blog/whisper/).
-
-```bash
-time whisper --model medium --task transcribe --fp16 False --output_dir transcriptions episodes-cut/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3
-#whisper --model medium --task transcribe --fp16 False --output_dir    38587.67s user 428.06s system 392% cpu 2:45:44.79 total
-
-time whisper --model small --language it --model_dir /dev/shm/whisper --task transcribe --fp16 False --output_dir output-small episodes-cut/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3
-#whisper --model small --language it --model_dir /dev/shm/whisper --task        11400.85s user 47.84s system 397% cpu 48:02.13 total
-
-# check difference between small and medium
-diff {output-small,transcriptions}/2022-07-27_Un’estate\ senza\ nichilismo,\ senza\ Temptation\ Island.mp3.txt
-```
-
-### Azure Cognitive Services
-
-https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription
-
-https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
-
-Cost: 5h free per month (30 episodes)
-```
-0.952€ / h = 0.0158€ / min
-0.015866667×10×650 = 103€ for all episodes
-```
-
-1. updload mp3 to storage account
-2. create transcription
-```bash
-curl -X POST "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions" \
--H "Content-Type: application/json" \
--H "Ocp-Apim-Subscription-Key: <subkey>" \
---data-ascii '{
-  "contentUrls": [
-    "https://tienimibordonespeech.blob.core.windows.net/tienimibordone/2022-07-28_Instagram perde colpi e cerca di insegnarmi l’amore.mp3"
-  ],
-  "properties": {
-    "diarizationEnabled": false,
-    "wordLevelTimestampsEnabled": false,
-    "punctuationMode": "DictatedAndAutomatic",
-    "profanityFilterMode": "Masked"
-  },
-  "locale": "it-IT",
-  "displayName": "Transcription using default model for it-IT"
-}'
-```
-Response:
-```
-{
-  "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356",
-  "model": {
-    "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/models/base/bc7665d4-e3cb-41c2-82f9-c5de2d1a2f9c"
-  },
-  "links": {
-    "files": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356/files"
-  },
-  "properties": {
-    "diarizationEnabled": false,
-    "wordLevelTimestampsEnabled": false,
-    "channels": [
-      0,
-      1
-    ],
-    "punctuationMode": "DictatedAndAutomatic",
-    "profanityFilterMode": "Masked"
-  },
-  "lastActionDateTime": "2022-08-18T21:09:10Z",
-  "status": "NotStarted",
-  "createdDateTime": "2022-08-18T21:09:10Z",
-  "locale": "it-IT",
-  "displayName": "Transcription using default model for it-IT"
-}
-```
-2. Get transcription status
-```bash
-curl https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356 \
--H "Ocp-Apim-Subscription-Key: <subkey>" \
-```
-Response:
-```
-{
-  "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356",
-  "model": {
-    "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/models/base/bc7665d4-e3cb-41c2-82f9-c5de2d1a2f9c"
-  },
-  "links": {
-    "files": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356/files"
-  },
-  "properties": {
-    "diarizationEnabled": false,
-    "wordLevelTimestampsEnabled": false,
-    "channels": [
-      0,
-      1
-    ],
-    "punctuationMode": "DictatedAndAutomatic",
-    "profanityFilterMode": "Masked",
-    "duration": "PT9M33S"
-  },
-  "lastActionDateTime": "2022-08-18T21:12:47Z",
-  "status": "Succeeded",
-  "createdDateTime": "2022-08-18T21:09:10Z",
-  "locale": "it-IT",
-  "displayName": "Transcription using default model for it-IT"
-}
-```
-3. Get transcription file URLs
-```bash
-curl https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356/files
--H "Ocp-Apim-Subscription-Key: <subkey>"
-```
-Response:
-```
-{
-  "values": [{
-      "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356/files/5641834c-109d-41aa-aff3-313ca6be2704",
-      "name": "contenturl_0.json",
-      "kind": "Transcription",
-      "properties": {
-        "size": 426385
-      },
-      "createdDateTime": "2022-08-18T21:12:47Z",
-      "links": {
-        "contentUrl": "https://spsvcproduks.blob.core.windows.net/bestor-948e9f4b-98f0-414a-b695-603be7bddabe/TranscriptionData/2fefde96-db52-44b6-8333-ced147b60356_0_0.json?sv=2021-06-08&st=2022-08-18T21%3A09%3A50Z&se=2022-08-19T09%3A14%3A50Z&sr=b&sp=rl&sig=LosgXORvovHQIoATmSNnzhbgGG%2BMtOWJXJgmymMJ%2FZA%3D"
-      }
-    },
-    {
-      "self": "https://uksouth.api.cognitive.microsoft.com/speechtotext/v3.0/transcriptions/2fefde96-db52-44b6-8333-ced147b60356/files/35163a8a-78f6-4fce-acf0-b74383cd14ef",
-      "name": "report.json",
-      "kind": "TranscriptionReport",
-      "properties": {
-        "size": 308
-      },
-      "createdDateTime": "2022-08-18T21:12:47Z",
-      "links": {
-        "contentUrl": "https://spsvcproduks.blob.core.windows.net/bestor-948e9f4b-98f0-414a-b695-603be7bddabe/TranscriptionData/2fefde96-db52-44b6-8333-ced147b60356_report.json?sv=2021-06-08&st=2022-08-18T21%3A09%3A50Z&se=2022-08-19T09%3A14%3A50Z&sr=b&sp=rl&sig=e0T3KsfYKfDki3VQd2CdwPDVEYaWA3WWydVPCiKKrFI%3D"
-      }
-    }
-  ]
-}
-```
-4. Get transcription
-```bash
-curl https://spsvcproduks.blob.core.windows.net/bestor-948e9f4b-98f0-414a-b695-603be7bddabe/TranscriptionData/2fefde96-db52-44b6-8333-ced147b60356_0_0.json?sv=2021-06-08&st=2022-08-18T21%3A09%3A50Z&se=2022-08-19T09%3A14%3A50Z&sr=b&sp=rl&sig=LosgXORvovHQIoATmSNnzhbgGG%2BMtOWJXJgmymMJ%2FZA%3D
-| jq '.combinedRecognizedPhrases[0].display'
-```
+1. Crawl
+    ```bash
+    pushd 1_fetcher
+    scrapy crawl tbfetcher
+    popd
+    ```
+2. Cut episodes
+    ```bash
+    pushd 2_cutter
+    ./cut-episodes.sh
+    popd
+    ```
+3. Transcribe
+    ```bash
+    pushd 3_transciber
+    ./uploader.py       # upload selected mp3 files interactively to Azure Storage
+    ./transcriber.py    # create transcriptions (and fix their file names)
+    popd
+    ```
 
 
-### Google Cloud Speech to Text API
+## References
 
-https://cloud.google.com/speech-to-text/docs/async-recognize
-
-Cost: https://cloud.google.com/speech-to-text/pricing
-
-```
-0.004$ / 15s
-0.004 x 4 x 10 = 0.16$ per episode
-0.16 x 650 = 104$ all episodes
-```
-
-### AWS Transcribe
-
-using CLI: https://docs.aws.amazon.com/transcribe/latest/dg/getting-started-cli.html
-
-tutorials: https://aws.amazon.com/transcribe/getting-started/?nc=sn&loc=4#Tutorials
-
-Cost: ~150$ all episodes
-
-
-## Retrieval and conversion of episodes
-
-
-https://www.ilpost.it/podcasts/tienimi-bordone/feed/
-
-Feed RSS does not link to mp3 file.
-Might as well parse the HTML page with list of episodes daily.
-
-
-## Useful commands
-
-Convert to wav
-```bash
-ffmpeg -i tienimi-bordone-677-instagram-perde-colpi-e-cerca-di-insegnarmi-lamore.{mp3,wav}
-```
-
-Command line player
-```bash
-mpv tienimi-bordone-677-instagram-perde-colpi-e-cerca-di-insegnarmi-lamore.wav
-```
-
-Cut mp3 or wav file
-```bash
-ffmpeg -i tienimi-bordone-677-instagram-perde-colpi-e-cerca-di-insegnarmi-lamore.mp3 -vn -acodec copy -ss 00:00:16 -to 00:01:10 output.mp3
-```
+- [How to blur background in GIMP](https://thegimptutorials.com/how-to-blur-background/)
+- [Whoosh, full text search library in Python](https://whoosh.readthedocs.io/en/latest/quickstart.html)
+- [Azure Speech to Text API docs](https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription)
+- [Azure Speech batch transcriptions docs](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/batch-transcription)
+- [Azure Cognitive Services Python examples](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python)
+- [Azure Storage Python examples](https://github.com/Azure/azure-storage-python/blob/master/samples/blob/block_blob_usage.py)
+- [Azure Storage Python docs](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-python-get-started?tabs=azure-ad)
+- [Azure Storage tips and tricks (post)](https://thats-it-code.com/azure/azure-blob-storage-operation-using-python/#python-azure-blob-storage-list-files)
 
 
 
