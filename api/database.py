@@ -19,13 +19,13 @@ class Transcription:
 
 @dataclass
 class GrepResult:
-    date: datetime
+    date: str
     title: str
     url: str
     excerpts: list[str]
 
     def __repr__(self) -> str:
-        res = f"{datetime.strftime(self.date, '%Y-%m-%d')} - {self.title}\n"
+        res = f"{self.date} - {self.title}\n"
         for excerpt in self.excerpts:
             res += f"\t{excerpt}\n"
         return res
@@ -125,7 +125,10 @@ class Database:
         for transcr in self.db.values():
             if term in transcr.content.lower():
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
-                gr = GrepResult(transcr.date, transcr.title, transcr.url, excerpts)
+                gr = GrepResult(datetime.strftime(transcr.date, '%Y-%m-%d'),
+                                transcr.title,
+                                transcr.url,
+                                excerpts)
                 ret.append(gr)
         return ret
 

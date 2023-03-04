@@ -16,7 +16,7 @@ function RenderResults({ data }: { data: GrepResult[] }) {
                 <div className='box'>
                     <div className='content is-small'>
                         <>
-                            <span className=''><a href={element.url}>{element.title}</a> - {element.date}</span>
+                            <span className=''>{element.date} - <a href={element.url}>{element.title}</a></span>
                             <>
                                 {element.excerpts.map(ex => {
                                     return (
