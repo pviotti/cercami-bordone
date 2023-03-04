@@ -1,13 +1,15 @@
-from flask import Flask, send_from_directory
-from flask_restful import Api, Resource, reqparse
-from flask_cors import CORS #comment this on deployment
+from flask import Flask, request, send_from_directory
+from database import Database
 
 app = Flask(__name__, static_url_path='', static_folder='static')
-CORS(app) # comment this on deployment
-api = Api(app)
+db = Database()
+
+@app.route("/grep")
+def grep():
+    term = request.args.get('q')
+    results = db.grep(term)
+    return [res.to_dict() for res in results]
 
 @app.route("/", defaults={'path':''})
-def serve(path):
+def root(path):
     return send_from_directory(app.static_folder,'index.html')
-
-api.add_resource(HelloApiHandler, '/flask/hello')

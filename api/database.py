@@ -1,6 +1,7 @@
 import glob
 import os
 import re
+import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
 import unicodedata
@@ -28,6 +29,9 @@ class GrepResult:
         for excerpt in self.excerpts:
             res += f"\t{excerpt}\n"
         return res
+
+    def to_dict(self):
+        return dataclasses.asdict(self)
 
 def slugify(value, allow_unicode: bool = False):
     """
@@ -130,7 +134,8 @@ class Database:
 if __name__ == "__main__":
     d = Database()
     # d.dump()
-    # d.grep("telefono")
-    res = d.grep("cucina")
-    for r in res:
-        print(r)
+    term = input("Enter a term to grep for > ")
+    if term:
+        res = d.grep(term)
+        for r in res:
+            print(r)
