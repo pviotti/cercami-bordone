@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Script to transcribe mp3 files previously uploaded into a blob container.
 # Modified version of this tutorial:
 # https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python
 
@@ -10,6 +11,7 @@ import swagger_client
 import json
 import time
 import os
+import glob
 from dotenv import load_dotenv
 
 
@@ -17,7 +19,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
         format="%(asctime)s %(message)s", datefmt="%Y-%m-%d %I:%M:%S %p %Z")
 
 
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 
 
 def getenv_or_exit(var: str) -> str:
@@ -34,9 +36,11 @@ LOCALE = "it-IT"
 SUBSCRIPTION_KEY = getenv_or_exit("AZURE_SUB_KEY")
 SERVICE_REGION = getenv_or_exit("AZURE_REGION")
 RECORDINGS_CONTAINER_URI = getenv_or_exit("AZURE_BLOB_CONTAINER_URI")
+OUTPUT_PATH="../output/transcriptions"
+ORIGINALS_PATH="../output/episodes-cut"
 
 
-def transcribe_from_container(uri, properties):
+def transcribe_from_container(uri: str, properties: swagger_client.TranscriptionProperties):
     """
     Transcribe all files in the container located at `uri` using the settings specified in `properties`
     using the base model for the specified locale.
@@ -149,7 +153,7 @@ def transcribe():
                     results_url = file_data.links.content_url
                     logging.info(f"Getting content URL {results_url} for {audiofilename}...")
                     results = requests.get(results_url)
-                    output_file = f"./transcriptions/{audiofilename.split('/')[1].strip('.mp3.json')}.transcription"
+                    output_file = f"{OUTPUT_PATH}/{audiofilename.split('/')[1].strip('.mp3.json')}.transcription"
                     logging.info(f"Results for {audiofilename} written to {output_file}.")
                     # logging.info(f"Results for {audiofilename}:\n{results.content.decode('utf-8')}")
                     try:
@@ -175,5 +179,30 @@ def transcribe():
         print(f"Listing existing transcriptions: {transcription_lst}")
 
 
+def _get_date_title(filepath: str) -> tuple[str, str]:
+    filename = filepath.split(os.sep)[-1]
+    filename_parts = filename.split("_")
+    date, title = filename_parts[0], filename_parts[1].split(".")[0]
+    return date, title
+
+def fix_transcriptions_titles(transcr_path: str = OUTPUT_PATH,
+                              originals_path: str = ORIGINALS_PATH,
+                              ext: str = "transcription"):
+    """Azure Speech Services can't do proper UTF-8, so transcription file names
+    have unrecognized characters. This function aims at fixing that."""
+
+    transcriptions = glob.glob(f"{transcr_path}/*.{ext}")
+    for transcr in transcriptions:
+        date, title = _get_date_title(transcr)
+
+        episodes = glob.glob(f"{originals_path}/{date}*.mp3")
+        _, episode_title = _get_date_title(episodes[0])
+
+        if title != episode_title:
+            print(f"Found different title: {date} - {title} : {episode_title}")
+            os.rename(transcr, f"{transcr_path}/{date}_{episode_title}.transcription")
+
+
 if __name__ == "__main__":
     transcribe()
+    fix_transcriptions_titles()

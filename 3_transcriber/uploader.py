@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# Module to upload mp3s to Azure Storage interactively
+
 import os
 import glob
 from threading import Lock
@@ -7,8 +10,10 @@ from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(dotenv_path="../.env")
 connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+
+FILES_PATH="../output/episodes-cut"
 
 blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 container_name = "tienimibordone"
@@ -47,10 +52,13 @@ def main():
 
         elif res == 'u':
             prefix = input("Input the prefix of files to upload: ")
-            files = glob.glob(f"./episodes-cut/{prefix}*.mp3")
+            files = glob.glob(f"{FILES_PATH}/{prefix}*.mp3")
 
-            with ThreadPoolExecutor(10) as executor:
-                executor.map(upload_file, files)
+            # XXX threadpoolexecutor seems slow
+            # with ThreadPoolExecutor(10) as executor:
+            #     executor.map(upload_file, files)
+            for file in files:
+                upload_file(file)
 
             print(f"Finished upload of {len(files)}.")
 
