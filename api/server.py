@@ -4,6 +4,11 @@ from database import Database
 app = Flask(__name__, static_url_path='', static_folder='static')
 db = Database()
 
+if app.debug:
+    # pip install flask-cors
+    from flask_cors import CORS
+    CORS(app)
+
 @app.route("/grep")
 def grep():
     term = request.args.get('q')
