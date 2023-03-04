@@ -1,30 +1,69 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from './images/cb_logo.jpg';
 import './App.css';
 
 type GrepResult = {
     title: string;
     url: string;
-    content: string;
+    date: string;
+    excerpts: string[];
 }
 
-function SearchResult({title, url, content}: GrepResult) {
-    return (
-        <div className='box'>
-            <div className='content is-small'>
-                <span className=''><a href={url}>{title}</a></span>
-                <blockquote className='blur-box'>
-                    ...{content}...
-                </blockquote>
-            </div>
-
-        </div>
-    );
+function RenderResults({ data }: { data: GrepResult[] }) {
+    const items = data.map(
+        element => {
+            return (
+                <div className='box'>
+                    <div className='content is-small'>
+                        <>
+                            <span className=''><a href={element.url}>{element.title}</a> - {element.date}</span>
+                            <>
+                                {element.excerpts.map(ex => {
+                                    return (
+                                        <blockquote className='blur-box'>
+                                            ...{ex}...
+                                        </blockquote>
+                                    )
+                                }
+                                )}
+                            </>
+                        </>
+                    </div>
+                </div>
+            )
+        }
+    )
+    return <>{items}</>;
 }
-
 
 
 function App() {
+
+    const [input, setInput] = useState("");
+    const [results, setResults] = useState([]);
+
+    const handleSearchClick = (_e: React.MouseEvent) => {
+        if (input.length > 2) {
+            fetch("http://localhost:5000/grep?q=" + input)
+                .then((response) => response.json())
+                .then((data) => {
+                    setResults(data)
+                    console.log(data)
+                });
+        }
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value;
+        if (inputValue !== "") {
+            // setShowSuggestions(true);
+        } else {
+            // setSymbol("");
+            // setShowSuggestions(false);
+            // setActiveSuggestionIndex(0);
+        }
+        setInput(inputValue);
+    }
     return (
         <>
             <section className="section is-medium">
@@ -40,12 +79,17 @@ function App() {
                         <div className="columns is-centered">
                             <div className="field has-addons">
                                 <div className="control">
-                                    <input className="input" type="text" placeholder="" />
+                                    <input className="input"
+                                        type="text"
+                                        placeholder=""
+                                        value={input}
+                                        onChange={handleInputChange}
+                                    />
                                 </div>
                                 <div className="control">
-                                    <a className="button is-info">
+                                    <button className="button is-info" onClick={handleSearchClick}>
                                         Cerca
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -56,11 +100,7 @@ function App() {
             <section>
                 <div className="columns is-centered">
                     <div className="column is-two-thirds">
-                        <SearchResult
-                            title="Title of the episode"
-                            url="https://duck.com"
-                            content="Ut venenatis, nisl scelerisque sollicitudin fermentum, quam libero hendrerit ipsum,
-                            ut blandit est tellus sit amet turpis"/>
+                        <RenderResults data={results} />
                     </div>
                 </div>
             </section>
