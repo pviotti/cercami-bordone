@@ -16,23 +16,19 @@ type Stats = {
 
 function RenderResults({ data }: { data: GrepResult[] }) {
     const items = data.map(
-        element => {
+        (element, index) => {
             return (
-                <div className='box'>
+                <div key={"ep-" + index.toString()} className='box'>
                     <div className='content is-small'>
-                        <>
-                            <span className=''>{element.date} - <a href={element.url}>{element.title}</a></span>
-                            <>
-                                {element.excerpts.map(ex => {
-                                    return (
-                                        <blockquote className='blur-box'>
-                                            ...{ex}...
-                                        </blockquote>
-                                    )
-                                }
-                                )}
-                            </>
-                        </>
+                        <span className=''>{element.date} - <a href={element.url}>{element.title}</a></span>
+                        {element.excerpts.map((excerpt, ex_idx) => {
+                            return (
+                                <blockquote key={"ex-" + ex_idx.toString()} className='blur-box'>
+                                    ...{excerpt}...
+                                </blockquote>
+                            )
+                        }
+                        )}
                     </div>
                 </div>
             )
@@ -60,19 +56,18 @@ function App() {
     }
 
     useEffect(() => {
-        fetch("http://localhost:5000/stats" + input)
+        fetch("http://localhost:5000/stats")
             .then((response) => response.json())
             .then((data: Stats) => {
                 setLastEpisodeDate(data.last_episode_date)
                 setNumEpisodes(data.num_episodes)
             });
-    }, []);
+        document.getElementById("input")?.focus();
+    });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
-        if (inputValue !== "") {
-            // setShowSuggestions(true);
-        } else {
+        if (inputValue == "") {
             setResults([]);
         }
         setInput(inputValue);
@@ -94,6 +89,7 @@ function App() {
                                 <div className="control">
                                     <input className="input"
                                         type="text"
+                                        id="input"
                                         placeholder="giappone"
                                         value={input}
                                         onChange={handleInputChange}
