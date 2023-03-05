@@ -102,6 +102,14 @@ cb.{$MY_DOMAIN} {
 }
 ```
 
+### Add transcriptions
+
+Run the section `Create transcriptions` then:
+```bash
+make sync-transcr
+curl https://cb.vshed.xyz/reload-database
+```
+
 ## References
 
 - [How to blur background in GIMP](https://thegimptutorials.com/how-to-blur-background/)
