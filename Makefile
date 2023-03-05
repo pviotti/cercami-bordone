@@ -4,10 +4,6 @@
 
 build: npm-build docker-build
 
-# check if there are episodes with the same date
-check-duplicates:
-	ls output/episodes-original/ | cut -d"_" -f1 | sort | uniq -c | sort -n
-
 docker-build:
 	docker build -t pviotti/cercamibordone .
 
@@ -23,4 +19,9 @@ deploy:
 npm-build:
 	cd frontend; npm run build
 
+sync-transcr:
+	rsync -avu output/transcriptions/ vshed.xyz:~/apps/data/cercamibordone
 
+# check if there are episodes with the same date
+check-duplicates:
+	ls output/episodes-original/ | cut -d"_" -f1 | sort | uniq -c | sort -n
