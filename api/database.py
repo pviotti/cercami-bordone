@@ -59,10 +59,10 @@ class Database:
         self.db: dict[datetime, Transcription] = {}
         self._load_files()
 
-    def _load_files(self, path: str = "transcriptions", ext: str = "transcription"):
+    def _load_files(self, path: str = "./transcriptions", ext: str = "transcription"):
         """Load transcriptions into a dictionary."""
 
-        files = glob.glob(f".{os.sep}{path}{os.sep}*.{ext}")
+        files = sorted(glob.glob(f"{path}/*.{ext}"), reverse=True)
 
         for file_path in files:
             with open(file_path, "r") as f:
@@ -122,6 +122,7 @@ class Database:
         that contain the given term.
         """
         ret = []
+        # TODO grep also on the title
         for transcr in self.db.values():
             if term in transcr.content.lower():
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
