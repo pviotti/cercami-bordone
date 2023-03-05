@@ -191,11 +191,15 @@ def fix_transcriptions_titles(transcr_path: str = OUTPUT_PATH,
     """Azure Speech Services can't do proper UTF-8, so transcription file names
     have unrecognized characters. This function aims at fixing that."""
 
-    transcriptions = glob.glob(f"{transcr_path}/*.{ext}")
+    transcriptions = sorted(glob.glob(f"{transcr_path}/*.{ext}"))
     for transcr in transcriptions:
         date, title = _get_date_title(transcr)
 
         episodes = glob.glob(f"{originals_path}/{date}*.mp3")
+        if len(episodes) > 1:
+            print(f"****** WARNING: Two episodes found for {date} in {originals_path}: will skip transcription for '{title}'")
+            continue
+
         _, episode_title = _get_date_title(episodes[0])
 
         if title != episode_title:

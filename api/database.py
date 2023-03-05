@@ -3,7 +3,8 @@ import os
 import re
 import dataclasses
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
 import unicodedata
 
 
@@ -80,7 +81,10 @@ class Database:
             url = f"https://www.ilpost.it/episodes/{slugify(title)}/"
             transcr = Transcription(date=date, content=content, title=title, url=url)
 
-            self.db[transcr.date] = transcr
+            if date in self.db:
+                # XXX hack to have date as primary key even if a few episodes have same date
+                date = date + timedelta(seconds=random.randint(0,10))
+            self.db[date] = transcr
 
     def reload_database(self):
         self.db.clear()
