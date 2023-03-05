@@ -68,6 +68,10 @@ class Database:
         files = sorted(glob.glob(f"{path}/*.{ext}"), reverse=True)
 
         for file_path in files:
+
+            if "REPLAY" in file_path:
+                continue
+
             with open(file_path, "r") as f:
                 content = f.read()
 
@@ -115,7 +119,7 @@ class Database:
         r_index = len(content) if r_index == -1 else r_index
         return content[l_index:r_index]
 
-    def _get_excerpts(self, content: str, term: str, length: int = 20) -> list[str]:
+    def _get_excerpts(self, content: str, term: str, length: int = 25) -> list[str]:
         start = 0
         f_index = 0
         excerpts = []
