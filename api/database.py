@@ -17,6 +17,7 @@ class Transcription:
     def __repr__(self) -> str:
         return f"{datetime.strftime(self.date, '%Y-%m-%d')} - {self.title}"
 
+
 @dataclass
 class GrepResult:
     date: str
@@ -32,6 +33,7 @@ class GrepResult:
 
     def to_dict(self):
         return dataclasses.asdict(self)
+
 
 def slugify(value, allow_unicode: bool = False):
     """
@@ -56,6 +58,7 @@ def slugify(value, allow_unicode: bool = False):
 
 class Database:
     def __init__(self):
+        # dict respect insertion order in Python 3.7+
         self.db: dict[datetime, Transcription] = {}
         self._load_files()
 
@@ -72,17 +75,26 @@ class Database:
             date = datetime.strptime(file_name.split("_")[0], "%Y-%m-%d")
             title = file_name.split("_")[1].split(f".{ext}")[0]
             url = f"https://www.ilpost.it/episodes/{slugify(title)}/"
-            transcr = Transcription(
-                date=date,
-                content=content,
-                title=title,
-                url=url
-            )
+            transcr = Transcription(date=date, content=content, title=title, url=url)
 
             self.db[transcr.date] = transcr
 
+    def reload_database(self):
+        self.db.clear()
+        self._load_files()
+
     def dump(self):
         print(self.db)
+
+    def get_stats(self) -> dict:
+        first_date = next(iter(self.db))
+        return {
+            "last_episode_date": self._date_to_str(first_date),
+            "num_episodes": len(self.db),
+        }
+
+    def _date_to_str(self, date: datetime) -> str:
+        return datetime.strftime(date, "%Y-%m-%d")
 
     def _build_excerpt_around_index(self, content: str, index: int, length: int) -> str:
         # left side
@@ -101,21 +113,21 @@ class Database:
 
         l_index = 0 if l_index == -1 else l_index
         r_index = len(content) if r_index == -1 else r_index
-        return content[l_index : r_index]
+        return content[l_index:r_index]
 
-
-    def _get_excerpts(self, content: str, term: str, length: int=20) -> list[str]:
+    def _get_excerpts(self, content: str, term: str, length: int = 20) -> list[str]:
         start = 0
         f_index = 0
         excerpts = []
         while f_index != -1:
             f_index = content.find(term, start)
             if f_index != -1:
-                excerpts.append(self._build_excerpt_around_index(content, f_index, length))
+                excerpts.append(
+                    self._build_excerpt_around_index(content, f_index, length)
+                )
                 start = f_index + 1
 
         return excerpts
-
 
     def grep(self, term: str) -> list[GrepResult]:
         """Grep the database of transcriptions for a list of episodes
@@ -126,13 +138,14 @@ class Database:
         for transcr in self.db.values():
             if term in transcr.content.lower():
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
-                gr = GrepResult(datetime.strftime(transcr.date, '%Y-%m-%d'),
-                                transcr.title,
-                                transcr.url,
-                                excerpts)
+                gr = GrepResult(
+                    self._date_to_str(transcr.date),
+                    transcr.title,
+                    transcr.url,
+                    excerpts,
+                )
                 ret.append(gr)
         return ret
-
 
 
 if __name__ == "__main__":

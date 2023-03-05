@@ -15,6 +15,15 @@ def grep():
     results = db.grep(term)
     return [res.to_dict() for res in results]
 
+@app.route("/stats")
+def stats():
+    return db.get_stats()
+
+@app.route("/reload-database")
+def reload_database():
+    db.reload_database()
+    return "<p>OK</p>"
+
 @app.route("/", defaults={'path':''})
 def root(path):
     return send_from_directory(app.static_folder,'index.html')
