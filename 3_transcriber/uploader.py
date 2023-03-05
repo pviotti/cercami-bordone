@@ -58,6 +58,8 @@ def main():
             # with ThreadPoolExecutor(10) as executor:
             #     executor.map(upload_file, files)
             for file in files:
+                if "REPLAY" in file:
+                    continue
                 upload_file(file)
 
             print(f"Finished upload of {len(files)}.")
