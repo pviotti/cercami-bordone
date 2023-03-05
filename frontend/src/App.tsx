@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import logo from './images/cb_logo.jpg';
 import './App.css';
 
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
+
 type GrepResult = {
     title: string;
     url: string;
@@ -58,7 +60,7 @@ function App() {
 
     const handleSearchClick = (_e: React.MouseEvent) => {
         if (input.length > 2) {
-            fetch("http://localhost:5000/grep?q=" + input)
+            fetch(`${API_ENDPOINT}/grep?q=${input}`)
                 .then((response) => response.json())
                 .then((data) => {
                     setResults(data)
@@ -67,7 +69,7 @@ function App() {
     }
 
     useEffect(() => {
-        fetch("http://localhost:5000/stats")
+        fetch(`${API_ENDPOINT}/stats`)
             .then((response) => response.json())
             .then((data: Stats) => {
                 setLastEpisodeDate(data.last_episode_date)
@@ -78,7 +80,7 @@ function App() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
-        if (inputValue == "") {
+        if (inputValue === "") {
             setResults([]);
         }
         setInput(inputValue);
