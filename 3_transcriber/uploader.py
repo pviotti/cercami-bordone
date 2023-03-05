@@ -52,7 +52,7 @@ def main():
 
         elif res == 'u':
             prefix = input("Input the prefix of files to upload: ")
-            files = glob.glob(f"{FILES_PATH}/{prefix}*.mp3")
+            files = sorted(glob.glob(f"{FILES_PATH}/{prefix}*.mp3"))
 
             # XXX threadpoolexecutor seems slow
             # with ThreadPoolExecutor(10) as executor:
