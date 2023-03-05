@@ -16,7 +16,7 @@ Steps involved:
     ```bash
     python -m venv venv
     source venv/bin/activate
-    python -m pip -r requirements.txt
+    python -m pip install -r requirements.txt
     ```
 2. Setup secrets in `.env` file
     ```
@@ -33,7 +33,7 @@ Steps involved:
     ln -s $(pwd)/output/transcriptions api/transcriptions
     ```
 
-## Run
+## Create transcriptions
 
 1. Crawl
     ```bash
@@ -55,6 +55,22 @@ Steps involved:
     popd
     ```
 
+## Develop web app
+
+Start frontend development server:
+```bash
+cd frontend
+npm start
+```
+Start API server:
+```bash
+cd api
+flask --debug --app server run
+```
+
+## Deploy web app
+
+TODO
 
 ## References
 
