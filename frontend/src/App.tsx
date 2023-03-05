@@ -14,7 +14,18 @@ type Stats = {
     num_episodes: number;
 }
 
-function RenderResults({ data }: { data: GrepResult[] }) {
+function getHighlightedText(text: string, highlight: string) {
+    // Split on highlight term and include term into parts, ignore case
+    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+    return <>
+        {parts.map((part, i) =>
+            <span key={"p" + i} style={part.toLowerCase() === highlight.toLowerCase() ? { fontWeight: 'bold' } : {}}>
+                {part}
+            </span>)
+    } </>;
+}
+
+function RenderResults({ data, highlight }: { data: GrepResult[], highlight: string }) {
     const items = data.map(
         (element, index) => {
             return (
@@ -24,7 +35,7 @@ function RenderResults({ data }: { data: GrepResult[] }) {
                         {element.excerpts.map((excerpt, ex_idx) => {
                             return (
                                 <blockquote key={"ex-" + ex_idx.toString()} className='blur-box'>
-                                    ...{excerpt}...
+                                    ...{getHighlightedText(excerpt, highlight)}...
                                 </blockquote>
                             )
                         }
@@ -109,7 +120,10 @@ function App() {
             <section>
                 <div className="columns is-centered">
                     <div className="column is-two-thirds">
-                        <RenderResults data={results} />
+                        <RenderResults
+                            data={results}
+                            highlight={input}
+                        />
                     </div>
                 </div>
             </section>
