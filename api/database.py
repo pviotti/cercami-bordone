@@ -68,7 +68,6 @@ class Database:
         files = sorted(glob.glob(f"{path}/*.{ext}"), reverse=True)
 
         for file_path in files:
-
             if "REPLAY" in file_path:
                 continue
 
@@ -138,7 +137,6 @@ class Database:
         that contain the given term.
         """
         ret = []
-        # TODO grep also on the title
         for transcr in self.db.values():
             if term in transcr.content.lower():
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
@@ -147,6 +145,11 @@ class Database:
                     transcr.title,
                     transcr.url,
                     excerpts,
+                )
+                ret.append(gr)
+            elif term in transcr.title.lower():
+                gr = GrepResult(
+                    self._date_to_str(transcr.date), transcr.title, transcr.url, []
                 )
                 ret.append(gr)
         return ret
