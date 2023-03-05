@@ -6,8 +6,8 @@ searchable through a web application.
 Steps involved:
 1. Retrieve podcast episodes
 2. Cut initial and ending credits
-3. Upload cut episodes to Azure storage and transcribe
-    them with Azure Speech Services
+3. Upload cut episodes to Azure Storage
+4. Transcribe episodes in Azure Storage using Azure Speech Services
 4. Expose transcriptions as a search engine web application
 
 ## Setup
@@ -61,6 +61,8 @@ Start frontend development server:
 ```bash
 cd frontend
 npm start
+# to build the React application in ./api/static
+npm run build
 ```
 Start API server:
 ```bash
@@ -70,7 +72,35 @@ flask --debug --app server run
 
 ## Deploy web app
 
-TODO
+```bash
+make build
+make docker-push
+make deploy
+```
+
+### Changes to configuration files in VPS
+
+`docker-compose.yml`
+```yml
+  cercamibordone:
+     image: pviotti/cercamibordone:latest
+     container_name: cercamibordone
+     restart: unless-stopped
+     volumes:
+      - ./data/cercamibordone:/app/transcriptions
+```
+
+`Caddyfile`
+```text
+cb.{$MY_DOMAIN} {
+  reverse_proxy cercamibordone:5000
+
+  log {
+    output file /logs/cb.log
+    level INFO
+  }
+}
+```
 
 ## References
 
