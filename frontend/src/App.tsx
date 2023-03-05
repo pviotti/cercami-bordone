@@ -58,21 +58,19 @@ function App() {
         if (inputValue !== "") {
             // setShowSuggestions(true);
         } else {
-            // setSymbol("");
-            // setShowSuggestions(false);
-            // setActiveSuggestionIndex(0);
+            setResults([]);
         }
         setInput(inputValue);
     }
     return (
         <>
-            <section className="section is-medium">
+            <section className="section is-small">
                 <div className="columns is-centered">
                     <div className="column is-two-thirds">
 
                         <div className='section is-small columns is-centered image'>
                             <figure className="image">
-                                <img src={logo} className="" alt="logo" />
+                                <img src={logo} className="logo" alt="logo" />
                             </figure>
                         </div>
 
@@ -81,7 +79,7 @@ function App() {
                                 <div className="control">
                                     <input className="input"
                                         type="text"
-                                        placeholder=""
+                                        placeholder="giappone"
                                         value={input}
                                         onChange={handleInputChange}
                                     />
@@ -104,6 +102,17 @@ function App() {
                     </div>
                 </div>
             </section>
+            <footer className="footer">
+                <div className="content has-text-centered is-small">
+                    <p>
+                        <b>Cercami Bordone</b> is a weekend project by <a href="https://github.com/pviotti">pviotti</a>.
+                    </p>
+                    <p>
+                        Last episode transcribed: XYZ <br />
+                        Total episodes in database: QWE <br />
+                    </p>
+                </div>
+            </footer>
         </>
     );
 }
