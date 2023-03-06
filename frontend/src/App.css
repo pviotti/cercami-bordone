@@ -4,6 +4,7 @@
 
 .logo {
     height: 180px !important;
+    width: auto !important;
 }
 
 #root {
