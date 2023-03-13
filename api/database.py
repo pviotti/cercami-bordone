@@ -122,7 +122,7 @@ class Database:
         r_index = len(content) if r_index == -1 else r_index
         return content[l_index:r_index]
 
-    def _get_excerpts(self, content: str, term: str, length: int = 25) -> list[str]:
+    def _get_excerpts(self, content: str, term: str, length: int = 30) -> list[str]:
         start = 0
         f_index = 0
         excerpts = []
@@ -141,6 +141,7 @@ class Database:
         that contain the given term.
         """
         ret = []
+        term = term.lower() # case insensitive search
         for transcr in self.db.values():
             if term in transcr.content.lower():
                 excerpts = self._get_excerpts(transcr.content.lower(), term)
