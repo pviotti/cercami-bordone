@@ -33,7 +33,7 @@ Steps involved:
     ln -s $(pwd)/output/transcriptions api/transcriptions
     ```
 
-## Create transcriptions
+## Add new transcriptions
 
 1. Crawl
     ```bash
@@ -53,6 +53,11 @@ Steps involved:
     ./uploader.py       # upload selected mp3 files interactively to Azure Storage
     ./transcriber.py    # create transcriptions (and fix their file names)
     popd
+    ```
+4. Add transcriptions to the web app
+    ```bash
+    make sync-transcr
+    curl https://cb.vshed.xyz/reload-database
     ```
 
 ## Develop web app
@@ -100,14 +105,6 @@ cb.{$MY_DOMAIN} {
     level INFO
   }
 }
-```
-
-### Add transcriptions
-
-Run the section `Create transcriptions` then:
-```bash
-make sync-transcr
-curl https://cb.vshed.xyz/reload-database
 ```
 
 ## References
