@@ -15,6 +15,7 @@ NEWSPIDER_MODULE = 'tbfetcher.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'tbfetcher (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -36,6 +37,7 @@ MEDIA_ALLOW_REDIRECTS = True
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
+#COOKIES_DEBUG = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -67,7 +69,7 @@ MEDIA_ALLOW_REDIRECTS = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'tbfetcher.pipelines.TbfetcherPipeline': 1,
+    "tbfetcher.pipelines.TbFilesPipeline": 1,
 }
 
 FILES_STORE = '../output/episodes-original'

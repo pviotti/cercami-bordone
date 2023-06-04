@@ -3,11 +3,11 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy.item import Item, Field
 
 
-class TbfetcherItem(scrapy.Item):
-    file_urls = scrapy.Field()
-    desc = scrapy.Field()
-    title = scrapy.Field()
+class TbfetcherItem(Item):
+    file_urls = Field()
+    date = Field()
+    title = Field()
 
