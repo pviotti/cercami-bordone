@@ -179,11 +179,10 @@ def transcribe():
         print(f"Listing existing transcriptions: {transcription_lst}")
 
 
-def _get_date_title(filepath: str) -> tuple[str, str]:
+def _get_date_and_title(filepath: str) -> tuple[str, str]:
     filename = filepath.split(os.sep)[-1]
     filename_parts = filename.split("_")
-    date, title = filename_parts[0], filename_parts[1].split(".")[0]
-    return date, title
+    return filename_parts[0], filename_parts[1].split(".")[0]
 
 def fix_transcriptions_titles(transcr_path: str = OUTPUT_PATH,
                               originals_path: str = ORIGINALS_PATH,
@@ -191,20 +190,20 @@ def fix_transcriptions_titles(transcr_path: str = OUTPUT_PATH,
     """Azure Speech Services can't do proper UTF-8, so transcription file names
     have unrecognized characters. This function aims at fixing that."""
 
-    transcriptions = sorted(glob.glob(f"{transcr_path}/*.{ext}"))
-    for transcr in transcriptions:
-        date, title = _get_date_title(transcr)
+    originals = sorted(glob.glob(f"{originals_path}/*.mp3"))
+    for original in originals:
+        date, episode_title = _get_date_and_title(original)
 
-        episodes = glob.glob(f"{originals_path}/{date}*.mp3")
-        if len(episodes) > 1:
-            print(f"****** WARNING: Two episodes found for {date} in {originals_path}: will skip transcription for '{title}'")
+        transcriptions = glob.glob(f"{transcr_path}/{date}*.{ext}")
+        if len(transcriptions) != 1:
+            print(f"****** WARNING: {len(transcriptions)} transcriptions found for {date} in {transcr_path}: will skip '{episode_title}'")
             continue
 
-        _, episode_title = _get_date_title(episodes[0])
+        _, transcription_title = _get_date_and_title(transcriptions[0])
 
-        if title != episode_title:
-            print(f"Found different title: {date} - {title} : {episode_title}")
-            os.rename(transcr, f"{transcr_path}/{date}_{episode_title}.transcription")
+        if transcription_title != episode_title:
+            print(f"Found different title: {date} - {transcription_title} : {episode_title}")
+            os.rename(transcriptions[0], f"{transcr_path}/{date}_{episode_title}.transcription")
 
 
 if __name__ == "__main__":
