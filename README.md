@@ -38,7 +38,8 @@ Steps involved:
 1. Crawl
     ```bash
     pushd 1_fetcher
-    scrapy crawl tbfetcher
+    # latest month that was transcribed
+    scrapy crawl tbfetcher -a year=2023 -a month=4
     popd
     ```
 2. Cut episodes
@@ -59,6 +60,15 @@ Steps involved:
     make sync-transcr
     curl https://cb.vshed.xyz/reload-database
     ```
+5. Check that the web site got updated
+6. Clean up
+   ```bash
+   rm -rf ./output/episodes-cut/*
+   rm -rf ./output/episodes-original/*
+   pushd 3_transciber
+   ./uploader.py       # clean up blob container
+   popd
+   ```
 
 ## Develop web app
 
