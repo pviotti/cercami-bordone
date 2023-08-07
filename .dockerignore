@@ -1,0 +1,4 @@
+*
+!api/static
+!api/database.py
+!api/server.py
